@@ -1,6 +1,8 @@
 import React from "react";
 
+// Restaurents component receives an 'item' prop
 const Restaurents = ({ item }) => {
+  // Destructuring the 'item' object to extract necessary information
   const {
     info: {
       name,
@@ -13,6 +15,7 @@ const Restaurents = ({ item }) => {
     },
   } = item;
 
+  // Render the restaurant information
   return (
     <div
       style={{
@@ -22,9 +25,25 @@ const Restaurents = ({ item }) => {
         justifyContent: "center",
         alignItems: "center",
         cursor: "pointer",
+        backgroundColor: "black",
+        borderRadius: "20px",
+        color: "white",
+        padding: "10px",
       }}
     >
-      <h3 style={{ fontSize: "16px", margin: 0 }}>{name}</h3>
+      {/* Display the restaurant name */}
+      <h1
+        style={{
+          fontSize: "20px",
+          margin: 0,
+          fontFamily: "Gabarito",
+          fontWeight: "700",
+        }}
+      >
+        {name}
+      </h1>
+
+      {/* Display the restaurant image */}
       <img
         src={`https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_660/${cloudinaryImageId}`}
         alt={name}
@@ -35,15 +54,33 @@ const Restaurents = ({ item }) => {
           borderRadius: "20px",
         }}
       />
-      <div style={{ display: "flex", flexDirection: "column" }}>
-        {" "}
+
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          fontFamily: "Gabarito",
+          fontWeight: "100",
+        }}
+      >
+        {/* Display the average rating */}
         <h3>Rating: ⭐{avgRating}</h3>
+
+        {/* Display the list of cuisines */}
         <li
-          style={{ display: "flex", flexDirection: "row", fontWeight: "900" }}
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            fontWeight: "900",
+            alignContent: "center",
+          }}
         >
           {cuisines.join(",")}
         </li>
+
+        {/* Display the cost for two */}
         <h3>Only {costForTwo}</h3>
+
         <div
           style={{
             display: "flex",
@@ -52,24 +89,8 @@ const Restaurents = ({ item }) => {
             justifyContent: "center",
           }}
         >
+          {/* Display the delivery time */}
           <h3> Delivery in {deliveryTime} Min</h3>
-          {/* <button
-            style={{
-              width: "40px",
-              height: "30px",
-              color: "green",
-              borderRadius: "10px",
-              border: "none",
-              fontFamily: "Jost Regular",
-              padding: "10px",
-              fontSize: "17px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            Add
-          </button> */}
         </div>
       </div>
     </div>

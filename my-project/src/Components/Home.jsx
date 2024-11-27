@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Restaurents from "./Restaurents";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export const Home = () => {
   const [menuData, setMenuData] = useState([]);
@@ -19,7 +18,7 @@ export const Home = () => {
       const data = await res.json();
       const restaurants =
         data?.data?.cards[4]?.card?.card?.gridElements?.infoWithStyle
-          ?.restaurants || []; //conditoinalyy rendering the data according to the structure
+          ?.restaurants || []; // Conditionally rendering the data according to the structure
       setMenuData(restaurants);
       setFilteredData(restaurants); // Initially show all restaurants
     };
@@ -44,17 +43,14 @@ export const Home = () => {
 
   // Search restaurants by name
   const filterBySearch = () => {
-    const filtered = menuData.filter(
-      (item) => item.info.name.toLowerCase().includes(text.toLowerCase()) //this is the
+    const filtered = menuData.filter((item) =>
+      item.info.name.toLowerCase().includes(text.toLowerCase())
     );
     setFilteredData(filtered);
   };
-
+  console.log(filteredData, "appy");
   return (
-    <div
-      style={{ textAlign: "center", marginTop: "20vh" }}
-      onClick={(item) => nav(`/menu/${item.info.id}`)}
-    >
+    <div style={{ textAlign: "center", marginTop: "20vh" }}>
       {/* Search Input */}
       <div style={{ marginBottom: "20px" }}>
         <input
@@ -67,6 +63,11 @@ export const Home = () => {
             borderRadius: "5px",
             width: "300px",
             marginRight: "10px",
+            border: "none",
+            backgroundColor: "#e6e6e6",
+            borderRadius: "15px",
+            paddingLeft: "20px",
+            fontFamily: "Gabarito",
           }}
         />
         <button
@@ -76,15 +77,16 @@ export const Home = () => {
             backgroundColor: "green",
             color: "white",
             border: "none",
-            borderRadius: "5px",
+            borderRadius: "15px",
             cursor: "pointer",
+            backgroundColor: "black",
           }}
         >
           Search
         </button>
       </div>
 
-      <h1 style={{ marginBottom: "50px", fontfamily: "Gabarito" }}>
+      <h1 style={{ marginBottom: "50px", fontFamily: "Gabarito" }}>
         Top Restaurants Around Bangalore
       </h1>
 
@@ -97,10 +99,11 @@ export const Home = () => {
             backgroundColor: "blue",
             color: "white",
             border: "none",
-            borderRadius: "5px",
+            borderRadius: "10px",
             marginRight: "10px",
             cursor: "pointer",
-            fontfamily: "Gabarito",
+            fontFamily: "Gabarito",
+            backgroundColor: "black",
           }}
         >
           Sort by Rating 4★
@@ -112,9 +115,10 @@ export const Home = () => {
             backgroundColor: "orange",
             color: "white",
             border: "none",
-            borderRadius: "5px",
+            borderRadius: "10px",
             cursor: "pointer",
-            fontfamily: "Gabarito",
+            fontFamily: "Gabarito",
+            backgroundColor: "black",
           }}
         >
           Sort by Delivery Time
@@ -134,18 +138,25 @@ export const Home = () => {
           <div
             key={index}
             style={{
-              padding: "10px",
-              backgroundColor: "#f4f4f4",
-              borderRadius: "10px",
-              boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+              padding: "15px",
+
+              borderRadius: "20px",
+
               textAlign: "center",
               width: "350px",
-              height: "400px",
+              height: "450px",
+              display: "grid",
+              alignItems: "center",
             }}
-            onClick={() => nav("/menu/" + item.info.id, { state: { item } })}
+            onClick={() => {
+              if (item.info && item?.info?.id) {
+                nav("/menu/" + item?.info?.id, { state: { item } });
+              } else {
+                console.error("Item info or ID is missing", item);
+              }
+            }}
           >
-            {" "}
-            <Restaurents key={item.info.id} item={item} />
+            <Restaurents key={item?.info?.id} item={item} />
           </div>
         ))}
       </div>

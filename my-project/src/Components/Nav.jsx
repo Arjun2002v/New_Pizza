@@ -1,7 +1,17 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
+import { auth } from "../firebaseConfig";
 
-export const Nav = () => {
+export const Nav = ({ user, setUser }) => {
+  const handleLogout = async () => {
+    try {
+      await auth.signOut();
+      setUser(null);
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+  };
+
   return (
     <div
       className="nav"
@@ -9,15 +19,13 @@ export const Nav = () => {
         fontFamily: "Gabarito",
         fontWeight: "100",
         textDecoration: "none",
-        fontSize: "20 px",
+        fontSize: "20px",
         alignItems: "center",
         justifyContent: "space-around",
+        display: "flex",
       }}
     >
       <h2 style={{ color: "orange" }}>ChiggyApp</h2>
-      <h2 style={{ color: "white" }}>Chiggy</h2>
-      <h2 style={{ color: "white" }}>Chiggy</h2>
-      <h2 style={{ color: "white" }}>Chiggy</h2>
       <div
         style={{
           display: "flex",
@@ -32,6 +40,25 @@ export const Nav = () => {
           Menu
         </Link>
       </div>
+      {user && (
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <span>{user.displayName}</span>
+          <button
+            onClick={handleLogout}
+            style={{
+              marginLeft: "10px",
+              fontFamily: "Gabarito",
+              border: "none",
+              padding: "10px",
+              borderRadius: "10px",
+              backgroundColor: "black",
+              color: "white",
+            }}
+          >
+            Logout
+          </button>
+        </div>
+      )}
     </div>
   );
 };
