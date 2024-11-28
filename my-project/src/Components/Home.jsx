@@ -2,28 +2,71 @@ import React, { useEffect, useState } from "react";
 import Restaurents from "./Restaurents";
 import { useNavigate } from "react-router-dom";
 
+export const LoadingScreen = () => (
+  <div
+    style={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      height: "100vh",
+      backgroundColor: "#f9f9f9",
+    }}
+  >
+    <div
+      style={{
+        width: "50px",
+        height: "50px",
+        border: "5px solid #f3f3f3",
+        borderRadius: "50%",
+        borderTop: "5px solid #3498db",
+        animation: "spin 1s linear infinite",
+      }}
+    ></div>
+  </div>
+);
+
+// CSS for Spinner
+const styles = document.createElement("style");
+styles.innerHTML = `
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+document.head.appendChild(styles);
+
 export const Home = () => {
   const [menuData, setMenuData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [text, setText] = useState(""); // State for search input
   const nav = useNavigate();
-
+  const [Loading, setLoading] = useState(false);
   const API_URL =
     "https://www.swiggy.com/dapi/restaurants/list/v5?lat=12.992311712735347&lng=77.70354036655421&is-seo-homepage-enabled=true&page_type=DESKTOP_WEB_LISTING";
 
   useEffect(() => {
     const fetchApiData = async () => {
-      const res = await fetch(API_URL);
-      if (!res.ok) throw new Error("Failed to fetch data");
-      const data = await res.json();
-      const restaurants =
-        data?.data?.cards[4]?.card?.card?.gridElements?.infoWithStyle
-          ?.restaurants || []; // Conditionally rendering the data according to the structure
-      setMenuData(restaurants);
-      setFilteredData(restaurants); // Initially show all restaurants
+      setLoading(true); // Start loading
+      try {
+        const res = await fetch(API_URL);
+        if (!res.ok) {
+          throw new Error("Failed to fetch data");
+        }
+        const data = await res.json();
+        const restaurants =
+          data?.data?.cards?.[4]?.card?.card?.gridElements?.infoWithStyle
+            ?.restaurants || []; // Conditionally render data
+        setMenuData(restaurants);
+        setFilteredData(restaurants); // Initially show all restaurants
+      } catch (error) {
+        console.error("Error fetching data:", error.message);
+      } finally {
+        setLoading(false); // Stop loading after fetch or in case of error
+      }
     };
+
     fetchApiData();
-  }, []);
+  }, [API_URL]); // Add `API_URL` as a dependency to avoid stale references
 
   // Filter by rating > 4
   const filterByRating = () => {
@@ -134,31 +177,46 @@ export const Home = () => {
           justifyContent: "center",
         }}
       >
-        {filteredData.map((item, index) => (
-          <div
-            key={index}
-            style={{
-              padding: "15px",
+        {filteredData ? (
+          <>
+            {" "}
+            {filteredData.map((item, index) => (
+              <div
+                key={index}
+                style={{
+                  padding: "15px",
 
-              borderRadius: "20px",
+                  borderRadius: "20px",
 
-              textAlign: "center",
-              width: "350px",
-              height: "450px",
-              display: "grid",
-              alignItems: "center",
-            }}
-            onClick={() => {
-              if (item.info && item?.info?.id) {
-                nav("/menu/" + item?.info?.id, { state: { item } });
-              } else {
-                console.error("Item info or ID is missing", item);
-              }
-            }}
-          >
-            <Restaurents key={item?.info?.id} item={item} />
-          </div>
-        ))}
+                  textAlign: "center",
+                  width: "350px",
+                  height: "450px",
+                  display: "grid",
+                  alignItems: "center",
+                }}
+                onClick={() => {
+                  if (item.info && item?.info?.id) {
+                    nav("/menu/" + item?.info?.id, { state: { item } });
+                  } else {
+                    console.error("Item info or ID is missing", item);
+                  }
+                }}
+              >
+                {Loading ? (
+                  <>
+                    <LoadingScreen />
+                  </>
+                ) : (
+                  <Restaurents key={item?.info?.id} item={item} />
+                )}
+              </div>
+            ))}
+          </>
+        ) : (
+          <>
+            <h2>Loading...</h2>
+          </>
+        )}
       </div>
     </div>
   );

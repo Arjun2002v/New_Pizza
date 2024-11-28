@@ -83,6 +83,7 @@ const Modal = ({ item, onClose, onConfirm }) => {
       </div>
     </>
   );
+  console.log(item.card.info.addon[2].choices[0].name);
 };
 
 export const Menu = () => {
@@ -92,16 +93,19 @@ export const Menu = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { item } = location.state || {};
+  const [loading, setLoading] = useState(false);
 
   const API_URL =
     "https://www.swiggy.com/mapi/menu/pl?page-type=REGULAR_MENU&complete-menu=true&lat=12.992311712735347&lng=77.70354036655421&restaurantId=";
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const res = await fetch(API_URL + resID);
         const data = await res.json();
         setResData(data.data);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -165,93 +169,114 @@ export const Menu = () => {
         </div>
       </div>
       {resData ? resData.cards?.[2]?.card.card.title : <></>}
+      {resData ? (
+        resData.cards?.map((item, index) => {
+          <>{}</>;
+        })
+      ) : (
+        <></>
+      )}
 
       {/* Conditional rendering to avoid accessing undefined */}
-      {resData ? (
-        resData.cards?.[5]?.groupedCard?.cardGroupMap?.REGULAR?.cards?.[2]?.card?.card?.itemCards?.map(
-          (item, index) => (
-            <div
-              key={index}
-              style={{ marginLeft: "15px", marginRight: "15px" }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignSelf: "stretch",
-                }}
-              >
-                <div>
-                  <h5
-                    style={{
-                      fontSize: "30px",
-                      fontFamily: "Gabarito",
-                      fontWeight: "800",
-                      color: "green",
-                    }}
-                  >
-                    {item.card.info.name}
-                  </h5>
+      {loading ? (
+        <>
+          <div></div>
+        </>
+      ) : (
+        <>
+          {" "}
+          {resData ? (
+            resData.cards?.[5]?.groupedCard?.cardGroupMap?.REGULAR?.cards?.[2]?.card?.card?.itemCards?.map(
+              (item, index) => (
+                <div
+                  key={index}
+                  style={{ marginLeft: "15px", marginRight: "15px" }}
+                >
                   <div
                     style={{
                       display: "flex",
-                      flexDirection: "column",
                       justifyContent: "space-between",
-                      gap: "25px",
+                      alignSelf: "stretch",
                     }}
                   >
+                    <div>
+                      <h5
+                        style={{
+                          fontSize: "30px",
+                          fontFamily: "Gabarito",
+                          fontWeight: "800",
+                          color: "green",
+                        }}
+                      >
+                        {item.card.info.name}
+                      </h5>
+
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent: "space-between",
+                          gap: "25px",
+                        }}
+                      >
+                        <div>{item.card.title}</div>
+                        <div
+                          style={{
+                            fontSize: "20px",
+                            fontFamily: "Gabarito",
+                            textDecoration: "underline",
+                          }}
+                        >
+                          {item.card.info.category}
+                        </div>
+                        <div
+                          style={{ fontSize: "20px", fontFamily: "Gabarito" }}
+                        >
+                          Ingredients: {item.card.info.description}
+                        </div>
+                      </div>
+                    </div>
+
                     <div
                       style={{
-                        fontSize: "20px",
-                        fontFamily: "Gabarito",
-                        textDecoration: "underline",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
                       }}
                     >
-                      {item.card.info.category}
-                    </div>
-                    <div style={{ fontSize: "20px", fontFamily: "Gabarito" }}>
-                      Ingredients: {item.card.info.description}
+                      <img
+                        src={`https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_300,h_300,c_fit/${item.card.info.imageId}.png`}
+                        alt=""
+                        style={{
+                          width: "200px",
+                          height: "200px",
+                          objectFit: "cover",
+                          borderRadius: "30px",
+                        }}
+                      />
+                      <button
+                        style={styles.addButton}
+                        onClick={() => handleAddClick(item)}
+                      >
+                        Add
+                      </button>
                     </div>
                   </div>
-                </div>
 
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                  }}
-                >
-                  <img
-                    src={`https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_300,h_300,c_fit/${item.card.info.imageId}.png`}
-                    alt=""
-                    style={{
-                      width: "200px",
-                      height: "200px",
-                      objectFit: "cover",
-                      borderRadius: "30px",
-                    }}
-                  />
-                  <button
-                    style={styles.addButton}
-                    onClick={() => handleAddClick(item)}
-                  >
-                    Add
-                  </button>
+                  <h4 style={{ fontFamily: "Poiret One", fontWeight: "900" }}>
+                    Rs:{" "}
+                    {item.card.info.defaultPrice / 100 ||
+                      item.card.info.price / 100}
+                  </h4>
                 </div>
-              </div>
-
-              <h4 style={{ fontFamily: "Poiret One", fontWeight: "900" }}>
-                Rs:{" "}
-                {item.card.info.defaultPrice / 100 ||
-                  item.card.info.price / 100}
-              </h4>
-            </div>
-          )
-        )
-      ) : (
-        <h3>Loading...</h3>
+              )
+            )
+          ) : (
+            <h3> Loading...</h3>
+          )}
+        </>
       )}
+
       {selectedItem && (
         <Modal
           item={selectedItem}
