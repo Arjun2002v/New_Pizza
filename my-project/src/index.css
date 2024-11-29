@@ -116,3 +116,14 @@ input {
   padding: 5px;
   font-family: "Jost Regular  ";
 }
+
+.accord {
+  display: flex,
+  justifyContent: space-between,
+  alignItems: center,
+
+  gap: 100px,
+
+  padding: 10px,
+color: green;
+}

@@ -23,6 +23,7 @@ export const Nav = ({ user, setUser }) => {
         alignItems: "center",
         justifyContent: "space-around",
         display: "flex",
+        marginTop: "50px",
       }}
     >
       <h2 style={{ color: "orange" }}>ChiggyApp</h2>
