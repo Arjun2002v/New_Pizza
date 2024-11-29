@@ -94,7 +94,10 @@ export const Menu = () => {
   const navigate = useNavigate();
   const { item } = location.state || {};
   const [loading, setLoading] = useState(false);
-
+  const [show, setShow] = useState(true);
+  const press = (resID) => {
+    setShow(!show);
+  };
   const API_URL =
     "https://www.swiggy.com/mapi/menu/pl?page-type=REGULAR_MENU&complete-menu=true&lat=12.992311712735347&lng=77.70354036655421&restaurantId=";
 
@@ -132,7 +135,7 @@ export const Menu = () => {
             fontSize: "40px",
             color: "black",
             fontFamily: "Gabarito",
-            fontWeight: "100",
+            fontWeight: "700",
             padding: "10px",
             borderRadius: "20px",
             display: "flex",
@@ -142,6 +145,151 @@ export const Menu = () => {
         >
           {resData ? resData.cards?.[2]?.card.card.info.name : <></>}
         </h3>
+        <div>
+          <h2
+            style={{
+              fontFamily: "Gabarito",
+              fontSize: "30px",
+              fontWeight: "700",
+            }}
+          >
+            {resData
+              ? resData?.cards?.[5]?.groupedCard?.cardGroupMap?.REGULAR?.cards
+                  ?.slice(1) // Exclude the first element
+                  ?.map((item, index) => (
+                    <>
+                      {" "}
+                      <div
+                        key={index} // Ideally, replace `index` with a unique identifier like `item.card.id` if available
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "20px",
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            gap: "100px",
+                            paddingRight: "200px",
+                            paddingLeft: "250px",
+                          }}
+                        >
+                          {item?.card?.card?.title}
+                          <div onClick={press}>
+                            {" "}
+                            <svg
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <g id="Add">
+                                <path
+                                  id="Shape"
+                                  d="M20 11.5C20.2519 11.5 20.461 11.6868 20.4951 11.9291L20.4999 12.012C20.4941 12.2585 20.3094 12.4615 20.0709 12.4951L19.9856 12.5H13H12.5V13V20C12.5 20.2519 12.3132 20.461 12.0709 20.4951L11.988 20.4999C11.7415 20.4941 11.5385 20.3094 11.5049 20.0709L11.5 19.9856V13V12.5H11H4C3.74805 12.5 3.53902 12.3132 3.50492 12.0708L3.50014 11.988C3.50595 11.7415 3.69062 11.5385 3.92915 11.5049L4.01442 11.5H11H11.5V11V4C11.5 3.74805 11.6868 3.53902 11.9292 3.50492L12.012 3.50014C12.2585 3.50595 12.4615 3.69062 12.4951 3.92915L12.5 4.01442V11V11.5H13H20Z"
+                                  fill="#494A4E"
+                                  stroke="#494A4E"
+                                />
+                              </g>
+                            </svg>
+                          </div>
+                        </div>
+                        {show ? (
+                          <div>
+                            {item?.card?.card?.itemCards?.map(
+                              (dish, dishIndex) => (
+                                <div>
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      justifyContent: "space-between",
+                                      alignItems: "center",
+                                      flexDirection: "row",
+                                      gap: "50px",
+                                    }}
+                                  >
+                                    <div
+                                      style={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: "50px",
+                                      }}
+                                    >
+                                      {" "}
+                                      <div
+                                        key={dishIndex}
+                                        style={{
+                                          color: "green",
+                                          fontSize: "30px",
+                                        }}
+                                      >
+                                        {dish?.card?.info?.name ??
+                                          "Unnamed Dish"}
+                                      </div>
+                                      <div
+                                        style={{
+                                          color: "black",
+                                          fontSize: "15px",
+                                          alignItems: "self-stretch",
+                                        }}
+                                      >
+                                        {dish?.card?.info?.description}
+                                      </div>
+                                      <div
+                                        style={{
+                                          color: "green",
+                                          fontSize: "15px",
+                                        }}
+                                      >
+                                        Rs :{" "}
+                                        {dish?.card?.info?.price / 100 ||
+                                          dish?.card?.info?.defaultPrice / 100}
+                                      </div>
+                                    </div>
+
+                                    <div
+                                      style={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        alignItems: "center",
+                                      }}
+                                    >
+                                      <img
+                                        src={`https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_300,h_300,c_fit/${dish.card.info.imageId}.png`}
+                                        alt=""
+                                        style={{
+                                          width: "200px",
+                                          height: "200px",
+                                          objectFit: "cover",
+                                          borderRadius: "30px",
+                                        }}
+                                      />
+                                      <button
+                                        style={styles.addButton}
+                                        onClick={() => handleAddClick(item)}
+                                      >
+                                        Add
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              )
+                            )}
+                          </div>
+                        ) : (
+                          <></>
+                        )}
+                      </div>
+                    </>
+                  ))
+              : null}
+          </h2>
+        </div>
+
         <div
           style={{
             display: "flex",
@@ -169,113 +317,8 @@ export const Menu = () => {
         </div>
       </div>
       {resData ? resData.cards?.[2]?.card.card.title : <></>}
-      {resData ? (
-        resData.cards?.map((item, index) => {
-          <>{}</>;
-        })
-      ) : (
-        <></>
-      )}
 
       {/* Conditional rendering to avoid accessing undefined */}
-      {loading ? (
-        <>
-          <div></div>
-        </>
-      ) : (
-        <>
-          {" "}
-          {resData ? (
-            resData.cards?.[5]?.groupedCard?.cardGroupMap?.REGULAR?.cards?.[2]?.card?.card?.itemCards?.map(
-              (item, index) => (
-                <div
-                  key={index}
-                  style={{ marginLeft: "15px", marginRight: "15px" }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignSelf: "stretch",
-                    }}
-                  >
-                    <div>
-                      <h5
-                        style={{
-                          fontSize: "30px",
-                          fontFamily: "Gabarito",
-                          fontWeight: "800",
-                          color: "green",
-                        }}
-                      >
-                        {item.card.info.name}
-                      </h5>
-
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          justifyContent: "space-between",
-                          gap: "25px",
-                        }}
-                      >
-                        <div>{item.card.title}</div>
-                        <div
-                          style={{
-                            fontSize: "20px",
-                            fontFamily: "Gabarito",
-                            textDecoration: "underline",
-                          }}
-                        >
-                          {item.card.info.category}
-                        </div>
-                        <div
-                          style={{ fontSize: "20px", fontFamily: "Gabarito" }}
-                        >
-                          Ingredients: {item.card.info.description}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                      }}
-                    >
-                      <img
-                        src={`https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_300,h_300,c_fit/${item.card.info.imageId}.png`}
-                        alt=""
-                        style={{
-                          width: "200px",
-                          height: "200px",
-                          objectFit: "cover",
-                          borderRadius: "30px",
-                        }}
-                      />
-                      <button
-                        style={styles.addButton}
-                        onClick={() => handleAddClick(item)}
-                      >
-                        Add
-                      </button>
-                    </div>
-                  </div>
-
-                  <h4 style={{ fontFamily: "Poiret One", fontWeight: "900" }}>
-                    Rs:{" "}
-                    {item.card.info.defaultPrice / 100 ||
-                      item.card.info.price / 100}
-                  </h4>
-                </div>
-              )
-            )
-          ) : (
-            <h3> Loading...</h3>
-          )}
-        </>
-      )}
 
       {selectedItem && (
         <Modal
