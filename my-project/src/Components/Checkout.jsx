@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import Razorpay from "razorpay";
+import { useLocation } from "react-router-dom";
 
 export const Checkout = () => {
   const [address, setAddress] = useState("");
+  location = useLocation();
+  const { item } = location.state || {};
 
   const handlePayment = () => {
     const options = {
@@ -36,7 +39,8 @@ export const Checkout = () => {
     <div style={{ padding: "20px", textAlign: "center" }}>
       <h1 style={{ fontFamily: "Gabarito", fontSize: "40px" }}>Checkout</h1>
       <p style={{ fontSize: "18px" }}>
-        Thank you for adding items to your cart. Please provide your delivery address and proceed to payment.
+        Thank you for adding items to your cart. Please provide your delivery
+        address and proceed to payment.
       </p>
       <input
         type="text"
@@ -45,11 +49,14 @@ export const Checkout = () => {
         onChange={(e) => setAddress(e.target.value)}
         style={{ width: "80%", padding: "10px", margin: "20px 0" }}
       />
-      <button onClick={handlePayment} style={{ padding: "10px 20px", fontSize: "18px" }}>
+      <button
+        onClick={handlePayment}
+        style={{ padding: "10px 20px", fontSize: "18px" }}
+      >
         Proceed to Payment
       </button>
     </div>
   );
 };
 
-export default Checkout; 
+export default Checkout;

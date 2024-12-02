@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { Nav } from "./Nav";
 
@@ -6,16 +6,21 @@ import { Nav } from "./Nav";
 const styles = {
   modal: {
     position: "fixed",
-    top: "50%",
+    top: "95%",
     left: "50%",
     transform: "translate(-50%, -50%)",
-    backgroundColor: "white",
+    backgroundColor: "green",
     padding: "20px",
     borderRadius: "10px",
     boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
     zIndex: 1000,
-    minWidth: "300px",
+    width: "80%",
+    color: "white",
     textAlign: "center",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: "500px",
   },
   overlay: {
     position: "fixed",
@@ -23,7 +28,7 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
+
     zIndex: 999,
   },
   modalButton: {
@@ -49,48 +54,36 @@ const styles = {
 };
 
 // Modal Component
-const Modal = ({ item, onClose, onConfirm }) => {
+const Modal = ({ item, quantity, onConfirm }) => {
   if (!item) return null; // Safeguard against undefined item
+  const totalQuantity = useMemo(() => {
+    return Object.values(quantity).reduce((acc, curr) => acc + curr, 0);
+  }, [quantity]);
   return (
     <>
-      <div style={styles.overlay} onClick={onClose} />
       <div style={styles.modal}>
-        <h2 style={{ fontFamily: "Gabarito" }}>Add to Cart</h2>
-        <p style={{ margin: "20px 0", fontSize: "18px" }}>
-          Add <strong>{item.name}</strong> to your cart?
-        </p>
-        <p style={{ fontWeight: "bold", margin: "10px 0" }}>
-          Price: ₹{item.price / 100 || item.defaultPrice / 100}
-        </p>
-        {item.description && (
-          <p style={{ fontStyle: "italic", color: "gray" }}>
-            {item.description}
-          </p>
-        )}
-        {item.imageId && (
-          <img
-            src={`https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_300,h_300,c_fit/${item.imageId}.png`}
-            alt={item.name}
-            style={{ width: "150px", height: "150px", borderRadius: "10px" }}
-          />
-        )}
-        <div>
-          <button
-            style={{
-              ...styles.modalButton,
-              backgroundColor: "green",
-              color: "white",
-            }}
+        <h3 style={{ fontFamily: "Gabarito", paddingBottom: "50px" }}>
+          {totalQuantity} item added
+        </h3>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <h2
+            style={{ fontFamily: "Gabarito", cursor: "pointer" }}
             onClick={onConfirm}
           >
-            Confirm
-          </button>
-          <button
-            style={{ ...styles.modalButton, backgroundColor: "#ddd" }}
-            onClick={onClose}
+            View Your Cart
+          </h2>
+          <h3
+            style={{
+              padding: "5px",
+              border: "none",
+              borderRadius: "20px",
+              fontFamily: "Gabarito",
+              paddingBottom: "20px",
+              cursor: "pointer",
+            }}
           >
             Cancel
-          </button>
+          </h3>
         </div>
       </div>
     </>
@@ -99,13 +92,15 @@ const Modal = ({ item, onClose, onConfirm }) => {
 
 export const Menu = () => {
   const [resData, setResData] = useState(null);
-  const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(false);
+  const [active, setActive] = useState([]);
   const { resID } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const { item } = location.state || {};
   const [loading, setLoading] = useState(false);
   const [show, setShow] = useState(true);
+  const [quantity, setQuantity] = useState({});
   const press = (index) => {
     setShow(show === index ? null : index);
   };
@@ -127,15 +122,34 @@ export const Menu = () => {
 
     fetchData();
   }, [resID]);
+  const handleAddClick = (id) => {
+    try {
+      setSelectedItem(true); // Set the selected item for the modal
 
-  const handleAddClick = (item) => {
-    setSelectedItem(item);
+      // Add or remove the ID from the active array
+      setActive((prevActive) => {
+        if (prevActive.includes(id)) {
+          // return prevActive.filter((activeId) => activeId !== id);
+          return prevActive;
+        } else {
+          return [...prevActive, id];
+        }
+      });
+
+      console.log(id, "sasds");
+      setQuantity((prev) => ({
+        ...prev,
+        [id]: (prev[id] || 0) + 1,
+      }));
+    } catch (error) {
+      alert("Error in handleAddClick:", error);
+    }
   };
 
   const handleConfirm = () => {
     console.log("Added to cart:", selectedItem);
     setSelectedItem(null);
-    navigate("/checkout"); // Navigate to checkout page
+    navigate("/checkout", { state: { item } }); // Navigate to checkout page
   };
 
   return (
@@ -157,6 +171,32 @@ export const Menu = () => {
           {resData ? resData.cards?.[2]?.card.card.info.name : <></>}
         </h3>
         <div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              gap: "20px",
+              alignItems: "center",
+              fontSize: "18px",
+              color: "black",
+              fontFamily: "Gabarito",
+              fontWeight: "800",
+              marginLeft: "20px ",
+            }}
+          >
+            <h4>
+              ⭐{" "}
+              {resData ? resData.cards?.[2]?.card.card.info.avgRating : <></>}
+            </h4>
+            <h4>
+              {resData ? (
+                resData.cards?.[2]?.card.card.info.sla.deliveryTime
+              ) : (
+                <></>
+              )}{" "}
+              min
+            </h4>
+          </div>
           <h2
             style={{
               fontFamily: "Gabarito",
@@ -178,8 +218,16 @@ export const Menu = () => {
                           gap: "20px",
                         }}
                       >
-                        <div className={show == index ? "accord" : ""}>
-                          <h4>{item?.card?.card?.title}</h4>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            paddingLeft: "100px",
+                            paddingRight: "100px",
+                          }}
+                        >
+                          <h4>{item?.card?.card?.title}(</h4>
 
                           <div onClick={() => press(index)}>
                             <svg
@@ -272,9 +320,15 @@ export const Menu = () => {
                                       />
                                       <button
                                         style={styles.addButton}
-                                        onClick={() => handleAddClick(item)}
+                                        onClick={() =>
+                                          handleAddClick(dish.card.info.id)
+                                        }
                                       >
-                                        Add
+                                        {active.includes(dish.card.info.id)
+                                          ? `${
+                                              quantity[dish.card.info.id] || 0
+                                            }`
+                                          : "Add"}
                                       </button>
                                     </div>
                                   </div>
@@ -291,32 +345,6 @@ export const Menu = () => {
               : null}
           </h2>
         </div>
-
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            gap: "20px",
-            alignItems: "center",
-            fontSize: "18px",
-            color: "black",
-            fontFamily: "Gabarito",
-            fontWeight: "800",
-            marginLeft: "20px ",
-          }}
-        >
-          <h4>
-            ⭐ {resData ? resData.cards?.[2]?.card.card.info.avgRating : <></>}
-          </h4>
-          <h4>
-            {resData ? (
-              resData.cards?.[2]?.card.card.info.sla.deliveryTime
-            ) : (
-              <></>
-            )}{" "}
-            min
-          </h4>
-        </div>
       </div>
       {resData ? resData.cards?.[2]?.card.card.title : <></>}
 
@@ -324,6 +352,8 @@ export const Menu = () => {
 
       {selectedItem && (
         <Modal
+          quantity={quantity}
+          setQuantity={setQuantity}
           item={selectedItem}
           onClose={() => setSelectedItem(null)}
           onConfirm={handleConfirm}

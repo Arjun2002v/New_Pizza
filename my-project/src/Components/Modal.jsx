@@ -9,7 +9,7 @@ const Modal = ({ item, onClose, onConfirm }) => {
           Add <strong>{item.name}</strong> to your cart?
         </p>
         <p style={{ fontWeight: "bold", margin: "10px 0" }}>
-          Price: ₹{item.price / 100 || item.defaultPrice / 100}
+          Price: ₹{item.price ? item.price / 100 : item.defaultPrice / 100}
         </p>
         {item.description && (
           <p style={{ fontStyle: "italic", color: "gray" }}>
