@@ -28,7 +28,6 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-
     zIndex: 999,
   },
   modalButton: {
@@ -50,15 +49,22 @@ const styles = {
     fontWeight: "700",
     border: "none",
     cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "5px",
   },
 };
 
 // Modal Component
-const Modal = ({ item, quantity, onConfirm }) => {
+const Modal = ({ item, quantity, onConfirm, onClose, Close }) => {
   if (!item) return null; // Safeguard against undefined item
+
+  // Calculate total quantity using useMemo to optimize performance
   const totalQuantity = useMemo(() => {
-    return Object.values(quantity).reduce((acc, curr) => acc + curr, 0);
+    return Object.values(quantity).reduce((acc, curr) => acc + curr, 1);
   }, [quantity]);
+
   return (
     <>
       <div style={styles.modal}>
@@ -68,7 +74,7 @@ const Modal = ({ item, quantity, onConfirm }) => {
         <div style={{ display: "flex", flexDirection: "column" }}>
           <h2
             style={{ fontFamily: "Gabarito", cursor: "pointer" }}
-            onClick={onConfirm}
+            onClick={onConfirm} // Trigger onConfirm when clicked
           >
             View Your Cart
           </h2>
@@ -81,6 +87,7 @@ const Modal = ({ item, quantity, onConfirm }) => {
               paddingBottom: "20px",
               cursor: "pointer",
             }}
+            onClick={Close} // Trigger Close when clicked
           >
             Cancel
           </h3>
@@ -91,22 +98,27 @@ const Modal = ({ item, quantity, onConfirm }) => {
 };
 
 export const Menu = () => {
-  const [resData, setResData] = useState(null);
-  const [selectedItem, setSelectedItem] = useState(false);
-  const [active, setActive] = useState([]);
-  const { resID } = useParams();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { item } = location.state || {};
-  const [loading, setLoading] = useState(false);
-  const [show, setShow] = useState(true);
-  const [quantity, setQuantity] = useState({});
+  const [resData, setResData] = useState(null); // State to store restaurant data
+  const [selectedItem, setSelectedItem] = useState(false); // State to track selected item
+  const [active, setActive] = useState([]); // State to track active items
+  const { resID } = useParams(); // Get restaurant ID from URL parameters
+  const location = useLocation(); // Get location object
+  const navigate = useNavigate(); // Hook to navigate programmatically
+  const { item } = location.state || {}; // Get item from location state
+  const [loading, setLoading] = useState(false); // State to track loading status
+  const [show, setShow] = useState(true); // State to control visibility
+  const [quantity, setQuantity] = useState({}); // State to track item quantities
+
+  // Function to toggle visibility of item details
   const press = (index) => {
     setShow(show === index ? null : index);
   };
+
+  // API URL to fetch restaurant menu
   const API_URL =
     "https://www.swiggy.com/mapi/menu/pl?page-type=REGULAR_MENU&complete-menu=true&lat=12.992311712735347&lng=77.70354036655421&restaurantId=";
 
+  // Fetch restaurant data when component mounts or resID changes
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -122,14 +134,21 @@ export const Menu = () => {
 
     fetchData();
   }, [resID]);
+
+  // Function to close the modal and reset selected item and quantity
+  const Close = () => {
+    setSelectedItem(null);
+    setQuantity(0);
+  };
+
+  // Function to handle adding an item
   const handleAddClick = (id) => {
     try {
       setSelectedItem(true); // Set the selected item for the modal
 
       // Add or remove the ID from the active array
       setActive((prevActive) => {
-        if (prevActive.includes(id)) {
-          // return prevActive.filter((activeId) => activeId !== id);
+        if (prevActive.includes(id)) {   
           return prevActive;
         } else {
           return [...prevActive, id];
@@ -137,19 +156,27 @@ export const Menu = () => {
       });
 
       console.log(id, "sasds");
-      setQuantity((prev) => ({
-        ...prev,
-        [id]: (prev[id] || 0) + 1,
-      }));
     } catch (error) {
       alert("Error in handleAddClick:", error);
     }
   };
 
+  // Function to increase the quantity of an item
+  const increase = (id) => {
+    setQuantity((prev) => ({
+      ...prev,
+      [id]: (prev[id] || 0) + 1,
+    }));
+  };
+
+  // Function to handle confirmation and navigate to checkout
   const handleConfirm = () => {
     console.log("Added to cart:", selectedItem);
     setSelectedItem(null);
-    navigate("/checkout", { state: { item } }); // Navigate to checkout page
+    navigate("/checkout", {
+      state: { item, quantity },
+    });
+    console.log(item, "oioi");
   };
 
   return (
@@ -326,9 +353,22 @@ export const Menu = () => {
                                       >
                                         {active.includes(dish.card.info.id)
                                           ? `${
-                                              quantity[dish.card.info.id] || 0
+                                              quantity[dish.card.info.id] || 1
                                             }`
                                           : "Add"}
+
+                                        {active.includes(dish.card.info.id) ? (
+                                          <div
+                                            style={{ fontSize: "20px" }}
+                                            onClick={() =>
+                                              increase(dish.card.info.id)
+                                            }
+                                          >
+                                            ➕
+                                          </div>
+                                        ) : (
+                                          <></>
+                                        )}
                                       </button>
                                     </div>
                                   </div>
@@ -357,6 +397,7 @@ export const Menu = () => {
           item={selectedItem}
           onClose={() => setSelectedItem(null)}
           onConfirm={handleConfirm}
+          Close={Close}
         />
       )}
     </div>

@@ -1,60 +1,42 @@
-import React, { useState } from "react";
-import Razorpay from "razorpay";
+import React from "react";
 import { useLocation } from "react-router-dom";
 
-export const Checkout = () => {
-  const [address, setAddress] = useState("");
-  location = useLocation();
-  const { item } = location.state || {};
+const Checkout = () => {
+  const location = useLocation();
+  const { item, quantity } = location.state || {};
 
-  const handlePayment = () => {
-    const options = {
-      key: "YOUR_RAZORPAY_KEY", // Replace with your Razorpay key
-      amount: 50000, // Amount in paise (e.g., 50000 paise = ₹500)
-      currency: "INR",
-      name: "Your Company Name",
-      description: "Test Transaction",
-      handler: function (response) {
-        alert("Payment successful!");
-        console.log(response);
-      },
-      prefill: {
-        name: "Customer Name",
-        email: "customer@example.com",
-        contact: "9999999999",
-      },
-      notes: {
-        address: address,
-      },
-      theme: {
-        color: "#F37254",
-      },
-    };
-
-    const rzp1 = new Razorpay(options);
-    rzp1.open();
-  };
+  // Check if item and quantity are valid
+  if (
+    !item ||
+    !Array.isArray(item) ||
+    !quantity ||
+    typeof quantity !== "object"
+  ) {
+    return <div>No items in the cart or data is invalid.</div>;
+  }
 
   return (
-    <div style={{ padding: "20px", textAlign: "center" }}>
-      <h1 style={{ fontFamily: "Gabarito", fontSize: "40px" }}>Checkout</h1>
-      <p style={{ fontSize: "18px" }}>
-        Thank you for adding items to your cart. Please provide your delivery
-        address and proceed to payment.
-      </p>
-      <input
-        type="text"
-        placeholder="Enter your delivery address"
-        value={address}
-        onChange={(e) => setAddress(e.target.value)}
-        style={{ width: "80%", padding: "10px", margin: "20px 0" }}
-      />
-      <button
-        onClick={handlePayment}
-        style={{ padding: "10px 20px", fontSize: "18px" }}
-      >
-        Proceed to Payment
-      </button>
+    <div>
+      <h1>Checkout</h1>
+      <div>
+        {item.map((product) => (
+          <div key={product.id} style={{ marginBottom: "20px" }}>
+            <h3>{product.name}</h3>
+            <p>Description: {product.description}</p>
+            <p>Quantity: {quantity[product.id] || 0}</p>
+            <p>Price per item: ₹{product.price}</p>
+            <p>Total: ₹{product.price * (quantity[product.id] || 0)}</p>
+          </div>
+        ))}
+      </div>
+      <h2>
+        Total Price: ₹
+        {item.reduce(
+          (total, product) =>
+            total + product.price * (quantity[product.id] || 0),
+          0
+        )}
+      </h2>
     </div>
   );
 };
