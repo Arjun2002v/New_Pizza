@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
-import { Nav } from "./Nav";
 
 // Styles object for better organization
 const styles = {
@@ -57,13 +56,29 @@ const styles = {
 };
 
 // Modal Component
-const Modal = ({ item, quantity, onConfirm, onClose, Close }) => {
+const Modal = ({
+  item,
+  quantity,
+  onConfirm,
+  onClose,
+  Close,
+  cart,
+  navigate,
+}) => {
   if (!item) return null; // Safeguard against undefined item
 
   // Calculate total quantity using useMemo to optimize performance
   const totalQuantity = useMemo(() => {
     return Object.values(quantity).reduce((acc, curr) => acc + curr, 1);
   }, [quantity]);
+  const cartBoi = () => {
+    if (cart)
+      navigate("/cart", {
+        state: { cart, totalQuantity },
+      });
+
+    console.log(cart, "Oi niggas");
+  };
 
   return (
     <>
@@ -74,7 +89,7 @@ const Modal = ({ item, quantity, onConfirm, onClose, Close }) => {
         <div style={{ display: "flex", flexDirection: "column" }}>
           <h2
             style={{ fontFamily: "Gabarito", cursor: "pointer" }}
-            onClick={onConfirm} // Trigger onConfirm when clicked
+            onClick={cartBoi} // Trigger onConfirm when clicked
           >
             View Your Cart
           </h2>
@@ -148,7 +163,7 @@ export const Menu = () => {
 
       // Add or remove the ID from the active array
       setActive((prevActive) => {
-        if (prevActive.includes(id)) {   
+        if (prevActive.includes(id)) {
           return prevActive;
         } else {
           return [...prevActive, id];
@@ -173,10 +188,9 @@ export const Menu = () => {
   const handleConfirm = () => {
     console.log("Added to cart:", selectedItem);
     setSelectedItem(null);
-    navigate("/checkout", {
-      state: { item, quantity },
-    });
+
     console.log(item, "oioi");
+    console.log(resData, quantity, "Oi niggas");
   };
 
   return (
@@ -398,6 +412,8 @@ export const Menu = () => {
           onClose={() => setSelectedItem(null)}
           onConfirm={handleConfirm}
           Close={Close}
+          cart={resData}
+          navigate={navigate}
         />
       )}
     </div>

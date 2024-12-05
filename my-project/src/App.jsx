@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Home } from "./Components/Home";
 import { Menu } from "./Components/Menu";
-import { Cart } from "./Components/Cart";
+
 import { Checkout } from "./Components/Checkout";
 import { Nav } from "./Components/Nav";
 import Login from "./Components/Login";
 import { auth } from "./firebaseConfig";
+import Cart from "./Components/Cart";
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -45,13 +46,15 @@ const App = () => {
               }
             />
             <Route path="/menu/:resID" element={<Menu />} />
-            <Route path="/cart" element={<Cart />} />
+
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/cart" element={<Cart />} />
           </Routes>
         </>
       ) : (
         <Routes>
           <Route path="/login" element={<Login setUser={setUser} />} />
+
           <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
       )}

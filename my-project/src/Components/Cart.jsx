@@ -1,28 +1,32 @@
-import React from "react";
 import { useLocation } from "react-router-dom";
 
-export const Cart = () => {
+const Cart = () => {
   const location = useLocation();
-  const { cart, quantity } = location.state || {};
-
-  const totalPrice = cart.reduce(
-    (total, item) => total + item.costForTwo * (quantity[item.id] || 1),
-    0
-  );
-
+  const { cart, totalQuantity } = location.state || {};
+  let product = cart?.cards[5]?.groupedCard?.cardGroupMap?.REGULAR?.cards;
   return (
-    <div>
-      <h2>Cart Summary</h2>
-      {cart.map((item) => (
-        <div key={item.id}>
-          <p>
-            {quantity[item.info?.id]} x {item.name} - ₹
-            {item.costForTwo * quantity[item.info?.id]}
-          </p>
-        </div>
-      ))}
-      <h3>Total Price: ₹{totalPrice}</h3>
-      <button>Checkout</button>
-    </div>
+    <>
+      <h3>Total Quantity: {totalQuantity}</h3>
+      {product ? (
+        <>
+          {product.slice(1).map((item, index) => (
+            <div key={index}>
+              <div>{item.card.card.title}</div>
+              {item?.card?.card?.itemCards.map((product, prodIndex) => (
+                <div key={prodIndex}>
+                  <h3>{product.card.info.name}</h3>
+                </div>
+              ))}
+            </div>
+          ))}
+        </>
+      ) : (
+        <div>Cant Load your Cart</div>
+      )}
+
+      <h1>Oi Oi</h1>
+    </>
   );
 };
+
+export default Cart;
