@@ -19,7 +19,7 @@ const Cart = () => {
               ))}
             </div>
           ))}
-        </>
+        </>   
       ) : (
         <div>Cant Load your Cart</div>
       )}

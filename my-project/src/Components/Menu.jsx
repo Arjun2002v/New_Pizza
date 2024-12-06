@@ -72,14 +72,13 @@ const Modal = ({
     return Object.values(quantity).reduce((acc, curr) => acc + curr, 1);
   }, [quantity]);
   const cartBoi = () => {
-    if (cart)
-      navigate("/cart", {
-        state: { cart, totalQuantity },
-      });
-
-    console.log(cart, "Oi niggas");
+    if (cart) {
+      navigate("/cart", { state: { cart, quantity } });
+      console.log(cart, "items");
+    } else {
+      alert(cart);
+    }
   };
-
   return (
     <>
       <div style={styles.modal}>
@@ -113,7 +112,7 @@ const Modal = ({
 };
 
 export const Menu = () => {
-  const [resData, setResData] = useState(null); // State to store restaurant data
+  const [resData, setResData] = useState([]); // State to store restaurant data
   const [selectedItem, setSelectedItem] = useState(false); // State to track selected item
   const [active, setActive] = useState([]); // State to track active items
   const { resID } = useParams(); // Get restaurant ID from URL parameters
