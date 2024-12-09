@@ -116,3 +116,8 @@ input {
   padding: 5px;
   font-family: "Jost Regular  ";
 }
+
+.box {
+  border: 2px;
+  border-color: black;
+}
