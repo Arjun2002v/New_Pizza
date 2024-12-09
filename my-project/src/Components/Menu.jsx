@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { atom, useAtom } from "jotai";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 
 // Styles object for better organization
@@ -64,16 +65,19 @@ const Modal = ({
   Close,
   cart,
   navigate,
+  handleAddClick,
 }) => {
   if (!item) return null; // Safeguard against undefined item
 
   // Calculate total quantity using useMemo to optimize performance
-  const totalQuantity = useMemo(() => {
-    return Object.values(quantity).reduce((acc, curr) => acc + curr, 1);
-  }, [quantity]);
+  // const totalQuantity = useMemo(() => {
+  //   return Object.values(quantity).reduce((acc, curr) => acc + curr, 1);
+  // }, [quantity]);
+  const [totalQuantity] = useAtom(totalQuantityAtom);
+
   const cartBoi = () => {
     if (cart) {
-      navigate("/cart", { state: { cart, quantity } });
+      navigate("/cart", { state: { cart, totalQuantity } });
       console.log(cart, "items");
     } else {
       alert(cart);
@@ -110,22 +114,32 @@ const Modal = ({
     </>
   );
 };
+export const quantityAtom = atom({});
+export const totalQuantityAtom = atom((get) => {
+  const quantity = get(quantityAtom);
+  return Object.values(quantity).reduce((acc, curr) => acc + curr, 1);
+});
+export const activeAtom = atom([]);
 
 export const Menu = () => {
   const [resData, setResData] = useState([]); // State to store restaurant data
   const [selectedItem, setSelectedItem] = useState(false); // State to track selected item
-  const [active, setActive] = useState([]); // State to track active items
+  const [active, setActive] = useAtom(activeAtom);
+  // State to track active items
   const { resID } = useParams(); // Get restaurant ID from URL parameters
   const location = useLocation(); // Get location object
   const navigate = useNavigate(); // Hook to navigate programmatically
   const { item } = location.state || {}; // Get item from location state
   const [loading, setLoading] = useState(false); // State to track loading status
   const [show, setShow] = useState(true); // State to control visibility
-  const [quantity, setQuantity] = useState({}); // State to track item quantities
-
+  const [quantity, setQuantity] = useAtom(quantityAtom); // State to track item quantities
+  console.log(active, quantity, "happy");
   // Function to toggle visibility of item details
   const press = (index) => {
     setShow(show === index ? null : index);
+  };
+  const handleAdd = (item) => {
+    console.log(`Added ${item.name} to the cart.`);
   };
 
   // API URL to fetch restaurant menu
@@ -156,22 +170,30 @@ export const Menu = () => {
   };
 
   // Function to handle adding an item
-  const handleAddClick = (id) => {
+  const handleAddClick = (info) => {
+    console.log(info, "sdd");
     try {
       setSelectedItem(true); // Set the selected item for the modal
 
       // Add or remove the ID from the active array
       setActive((prevActive) => {
-        if (prevActive.includes(id)) {
-          return prevActive;
+        // Check if the item with the same ID already exists in the array
+        const itemIndex = prevActive.findIndex(
+          (activeItem) => activeItem.id === info.id
+        );
+
+        if (itemIndex >= 0) {
+          // If it exists, update the quantity (or any other property)
+          const updatedActive = [...prevActive];
+          updatedActive[itemIndex].quantity += 1; // Update quantity or other properties
+          return updatedActive;
         } else {
-          return [...prevActive, id];
+          // If it doesn't exist, add a new object with the item properties
+          return [...prevActive, { ...info, quantity: 1 }];
         }
       });
-
-      console.log(id, "sasds");
     } catch (error) {
-      alert("Error in handleAddClick:", error);
+      console.error("Error in handleAddClick:", error);
     }
   };
 
@@ -361,16 +383,22 @@ export const Menu = () => {
                                       <button
                                         style={styles.addButton}
                                         onClick={() =>
-                                          handleAddClick(dish.card.info.id)
+                                          handleAddClick(dish.card.info)
                                         }
                                       >
-                                        {active.includes(dish.card.info.id)
+                                        {active?.some(
+                                          (item) =>
+                                            item.id === dish.card.info.id
+                                        )
                                           ? `${
                                               quantity[dish.card.info.id] || 1
                                             }`
                                           : "Add"}
 
-                                        {active.includes(dish.card.info.id) ? (
+                                        {active?.some(
+                                          (item) =>
+                                            item.id === dish.card.info.id
+                                        ) ? (
                                           <div
                                             style={{ fontSize: "20px" }}
                                             onClick={() =>
@@ -413,6 +441,7 @@ export const Menu = () => {
           Close={Close}
           cart={resData}
           navigate={navigate}
+          handleAddClick={handleAddClick}
         />
       )}
     </div>

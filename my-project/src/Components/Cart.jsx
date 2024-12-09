@@ -1,31 +1,25 @@
-import { useLocation } from "react-router-dom";
+import { useAtom } from "jotai";
+import React, { useContext } from "react";
+import { activeAtom, totalQuantityAtom } from "./Menu";
 
 const Cart = () => {
-  const location = useLocation();
-  const { cart, totalQuantity } = location.state || {};
-  let product = cart?.cards[5]?.groupedCard?.cardGroupMap?.REGULAR?.cards;
-  return (
-    <>
-      <h3>Total Quantity: {totalQuantity}</h3>
-      {product ? (
-        <>
-          {product.slice(1).map((item, index) => (
-            <div key={index}>
-              <div>{item.card.card.title}</div>
-              {item?.card?.card?.itemCards.map((product, prodIndex) => (
-                <div key={prodIndex}>
-                  <h3>{product.card.info.name}</h3>
-                </div>
-              ))}
-            </div>
-          ))}
-        </>   
-      ) : (
-        <div>Cant Load your Cart</div>
-      )}
+  const [totalQuantity] = useAtom(totalQuantityAtom);
+  const [activeData] = useAtom(activeAtom);
 
-      <h1>Oi Oi</h1>
-    </>
+  return (
+    <div>
+      <h1>Cart</h1>
+      <h3>Total Quantity: {totalQuantity}</h3>
+      <div>
+        {activeData.map((item) => (
+          <div key={item.id}>
+            <h4>{item.name}</h4>
+            <p>Quantity: {item.quantity}</p>
+            <p>Price: Rs. {item.price / 100 || item.defaultPrice / 100}</p>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 };
 
