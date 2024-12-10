@@ -3,8 +3,11 @@ import React, { useContext } from "react";
 import { activeAtom, totalQuantityAtom } from "./Menu";
 
 const Cart = () => {
-  const [totalQuantity] = useAtom(totalQuantityAtom);
-  const [activeData] = useAtom(activeAtom);
+    const [activeData] = useAtom(activeAtom);
+  const totalPrice = activeData.reduce((acc, item) => {
+    const price = item.price || item.defaultPrice; // Handle both price and defaultPrice
+    return acc + (price / 100) * item.quantity; // Convert price to Rs. and multiply by quantity
+  }, 0);
 
   return (
     <div
@@ -20,9 +23,7 @@ const Cart = () => {
       >
         Cart
       </h1>
-      <h3 style={{ fontFamily: "Gabarito", fontWeight: "700" }}>
-        Total Quantity: {totalQuantity}
-      </h3>
+      <h3 style={{ fontFamily: "Gabarito", fontWeight: "700" }}></h3>
       <div>
         <div
           style={{
@@ -68,8 +69,9 @@ const Cart = () => {
         </div>
       </div>
       <h3 style={{ fontFamily: "Gabarito", fontWeight: "300" }}>
-        Total Price to be Paid Rs:{" "}
+        Total Price to be Paid Rs:{totalPrice}
       </h3>
+      <h3>Total Quant {totalQuant}</h3>
     </div>
   );
 };
